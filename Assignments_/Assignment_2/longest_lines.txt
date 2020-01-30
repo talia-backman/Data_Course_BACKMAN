@@ -1,0 +1,7 @@
+    6 salmon.txt
+    8 animals.txt
+   20 amino-acids.txt
+   50 morse.txt
+  230 planets.txt
+ 3080 sunspot.txt
+ 3394 total
