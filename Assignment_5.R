@@ -271,5 +271,13 @@ ggplot(iris,aes(x=Ratio,y=Ratio_score,fill=Species)) +
   theme(axis.title.y = element_blank(),
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank())
+ggplot(iris,aes(x=Ratio,y=Ratio_score,fill=Species)) +
+  geom_bar(stat = 'identity',width=.8) +
+  labs(title = "Sepal length deviance from the mean of all observations",
+       caption = "Note: Deviance = Sepal.length - mean(Sepal.length)",
+       y= "Deviance from the Mean",x="") +
+  coord_flip() + theme_minimal() +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank())
 dev.off()
 
