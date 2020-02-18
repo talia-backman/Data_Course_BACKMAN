@@ -1,0 +1,4 @@
+"x"
+"Original" 335
+"Automatic" 245
+"Max200" 175
