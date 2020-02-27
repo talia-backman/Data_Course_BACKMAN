@@ -1,5 +1,4 @@
 # Assignment Week 3
-library(skimr)
 
 
 
@@ -16,8 +15,6 @@ vector1*vector2
 
 list.files()
 getwd()
-?read.csv()
-
 dat = read.csv("./Data/thatch_ant.csv")
 names(dat)
 
@@ -81,7 +78,9 @@ levels(dat$Headwidth) # levels gives all the "options" of a factor you feed it
 
 # FIND WHICH ONES HAVE "41mm"
 
+dat$Headwidth
 dat$Headwidth=="41mm"
+
 
 # CONVERT THOSE TO "41.000"
 dat$Headwidth[dat$Headwidth=="41mm"] <- "41.000"
@@ -95,23 +94,21 @@ dat$Headwidth[dat$Headwidth == ""] <- NA
 
 
 # NOW, REMOVE ALL THE ROWS OF "dat" THAT HAVE AN "NA" VALUE
-dat <- na.omit(dat)
+na.omit(dat)
 
 # NOW, CONVERT THAT PESKY "Headwidth" COLUMN INTO A NUMERIC VECTOR WITHIN "dat"
-str(dat)
-glimpse(dat)
-dat$Headwidth <- factor(dat$Headwidth, levels = unique(dat$Headwidth))
-#two ways of doing the same thing:
-dat$Headwidth <- as.numeric(as.character(dat$Headwidth))
-dat$Headwidth %>% as.character() %>% as.numeric()
-dat$Headwidth <- dat$Headwidth %>% as.character() %>% as.numeric()
-dat$Headwidth
-skim(dat)
+
 str(dat)
 
-p <- plot(dat$Headwidth,dat$Mass)
-p <- ggplot(dat,aes(x=Headwidth,y=Mass)) +geom_point()
+as.numeric(dat$Headwidth)
+str(dat)
+dat_numeric <- as.character(dat$Headwidth) %>%
+  as.numeric()
+str(dat)
 
+dat$Headwidth <-  as.character(dat$Headwidth) %>%
+  as.numeric()
+str(dat)
 
 # LET'S LEARN HOW TO MAKE A DATA FRAME FROM SCRATCH... WE JUST FEED IT VECTORS WITH NAMES!
 
@@ -130,10 +127,9 @@ df1 # look at it...note column names are what we gave it.
 # Make a data frame from the first 20 rows of the ant data that only has "Colony" and "Mass"
 # save it into an object called "dat3"
 
-cols = c("Colony","Mass")
+##DO THIS AGAIN**********************************
+cols = c("Colony", "Mass")
 dat3 <- dat[1:20,cols]
-
-
 
 
 ###### WRITING OUT FILES FROM R #######
@@ -141,17 +137,7 @@ dat3 <- dat[1:20,cols]
 
 
 # Write your new object "dat3" to a file named "LASTNAME_first_file.csv" in your PERSONAL git repository
-write.csv(dat3, "Assignments/Assignment_3/BACKMAN_first_file.csv")
-
-summary(dat$Mass)
-plot(y=dat$Mass,x=dat$Size.class)
-
-under30_mass <- dat %>% filter(Size.class == "<30") %>%
-  select(Mass)
-mean(under30_mass$Mass)
-under30_mass <- dat %>% filter(Size.class == "30-34") %>%
-  select(Mass)
-mean(under30_mass$Mass)
+write.csv(dat3, "BACKMAN_first_file.csv")
 
 
 ### for loops in R ###
@@ -160,9 +146,6 @@ mean(under30_mass$Mass)
 for(i in 1:10){
   print(i)
 }
-for(i in 1:10){
-  print(i+10)
-}
 
 #another easy one
 for(i in levels(dat$Size.class)){
@@ -170,7 +153,6 @@ for(i in levels(dat$Size.class)){
 }
 
 # can calculate something for each value of i ...can use to subset to groups of interest
-#shows where mean bars are on graph..
 for(i in levels(dat$Size.class)){
   print(mean(dat[dat$Size.class == i,"Mass"]))
 }
@@ -195,36 +177,30 @@ new_vector
 # FIRST COLUMN WILL BE THE FACTOR LEVELS....
 # SECOND COLUMN WILL BE NAMED "MEAN" AND WILL BE VALUES FROM  new_vector
 
-#fill it in
-size_class_mean_mass = data.frame(Size_Class = levels(dat$Size.class),
-                                  MEAN = new_vector)
+#fill it in ***********************
+size_class_mean_mass = data.frame(new_vector)
 
-dat %>% group_by(Size.class) %>%
-  summarize(MEAN = mean(Mass))
 
-datsummary <- dat %>% group_by(Size.class) %>%
-    summarize(firstvariablename = mean(Mass),
-     secondvariablename = mean(Headwidth),
-     medianheadwidth = median(Headwidth))
+
+
 
 ############ YOUR HOMEWORK ASSIGNMENT ##############
 
 # 1.  Make a scatterplot of headwidth vs mass. See if you can get the points to be colored by "Colony"
-plot(x=dat$Headwidth,y=dat$Mass,pch=19,col=dat$Colony,xlab="Headwidth",ylab="Mass",main= "Wow, A Cool Scatterplot!")
+plot(x=dat$Headwidth,y=dat$Mass, pch=19,col=dat$Colony,xlab= "Headwidth", ylab= "Mass", main="Wow, What a Great Scatterplot!")
 
 # 2.  Write the code to save it (with meaningful labels) as a jpeg file
-jpeg("Cool_Scatterplot.jpeg")
-plot(x=dat$Headwidth,y=dat$Mass,pch=19,col=dat$Colony,xlab="Headwidth",ylab="Mass",main= "Wow, A Cool Scatterplot!")
+jpeg("Cool_plot.jpeg")
+plot(x=dat$Headwidth,y=dat$Mass, pch=19,col=dat$Colony,xlab= "Headwidth", ylab= "Mass", main="Wow, What a Great Scatterplot!")
 dev.off()
+getwd()
 
 # 3.  Subset the thatch ant data set to only include ants from colony 1 and colony 2
-dat4 <- dat %>% filter(Colony %in% c(1,2))     
+dat4 <- dat %>% filter(Colony == c(1:2))     
 
 
 # 4.  Write code to save this new subset as a .csv file
-write.csv(dat4, "Assignments//Assignment_3/Colony1_2.csv")
+write.csv(dat4, "colony_subset.csv")
 
 # 5.  Upload this R script (with all answers filled in and tasks completed) to canvas
 # I should be able to run your R script and get all the plots created and saved, etc.
-
-

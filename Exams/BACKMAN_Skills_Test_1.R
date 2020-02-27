@@ -1,5 +1,5 @@
 #load dataset
-df <- read.csv("./Exam_1/DNA_Conc_by_Extraction_Date.csv")
+df <- read.csv("./Exam_1/DNA_Conc_by_Extraction_Date.csv", stringsAsFactors = FALSE)
 #summary of data
 summary(df)
 library(tidyverse)
@@ -23,12 +23,18 @@ jpeg("BACKMAN_Plot2.jpeg")
 boxplot(df$DNA_Concentration_Ben~df$Year_Collected,
         main="Ben's Extractions",xlab="YEAR",ylab="DNA Concentration")
 dev.off()
+
 #Ben vs Katy's concentrations..
 summary(df$DNA_Concentration_Katy)
 summary(df$DNA_Concentration_Ben)
 summary(df$Year_Collected)
 plot(x=df$DNA_Concentration_Ben,y=df$Extract.Code)
 plot(x=df$DNA_Concentration_Katy,y=df$Extract.Code)
+plot(x=df$DNA_Concentration_Ben,y=df$DNA_Concentration_Katy)
+bensummary <- summary(df$DNA_Concentration_Ben)
+katysummary <- summary(df$DNA_Concentration_Katy)
+cbind(bensummary, katysummary)
+
 #Which YEAR was Ben's performance the lowest RELATIVE to Katy's?
 df$C <- (df$DNA_Concentration_Ben - df$DNA_Concentration_Katy)
 min(df$C)
@@ -36,11 +42,17 @@ df$Year_Collected[df$C == min(df$C)]
 #Answer= 2000
 
 #Subset df to just "Downstairs Lab"
-#####MAKE A SUBSET df3 <- df %>% filter(Ecosys_Type %in% c("Marine","Terrestrial"))
+#####MAKE A SUBSET
+library(tidyverse)
+down <- df %>% filter(Lab == "Downstairs")
+down$Date_Collected <- as.POSIXct(down$Date_Collected)
+
 class(df$Date_Collected)
 df$Date_Collected <- as.character(df$Date_Collected)
 class(df$Date_Collected)
 
 jpeg("Downstairs.jpeg")
-plot(x=df$Date_Collected,y=df$DNA_Concentration_Ben,col=df$Lab,xlab="Date_Collected",ylab="DNA_Concentration_Ben")
+plot(down$Date_Collected,down$DNA_Concentration_Ben,
+     main= "Ben, Downstairs, by Date_Collected",
+     xlab= "Date Collected", ylab= "DNA Concentration")
 dev.off()
