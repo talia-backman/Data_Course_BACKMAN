@@ -14,6 +14,9 @@ ggsave("./BACKMAN_Fig_1.jpg")
 sum(is.na(landdata$Region))
 which(is.na(landdata$Region))
 landdata$State[(is.na(landdata$Region))]
+#REAL CODE.. I didn't get :(:
+landdata[which(is.na(landdata$Region)), "State"] %>% 
+  unique()
 #use unique values
 
 # Task 3
@@ -36,14 +39,14 @@ long2 <- long %>%
 ggplot(long2,aes(x=Year, y=Average)) +
   geom_line(aes(group= Continent, color= Continent),size=3) + theme_minimal() +
   scale_x_discrete(breaks = c("1960","1980","2000")) +
-  labs(y= "Mean Mortality Rate (deaths per 1000 live births")
+  labs(y= "Mean Mortality Rate (deaths per 1000 live births)")
 ggsave("./BACKMAN_Fig_3.jpg")
 
 # Task 5
 proportions <- long$Child.Mortality/1000
 long3 <- cbind(long,proportions)
 ggplot(long,aes(x=Year,y=proportions)) +
-  geom_point(color = "blue") +
+  geom_point(color = "blue",alpha=.5) +
   facet_wrap(~Region) +
   labs(y= "Mortality Rate") +
   scale_x_discrete(breaks = c("1960","1980","2000")) +
