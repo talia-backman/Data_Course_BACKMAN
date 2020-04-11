@@ -1,0 +1,33 @@
+---
+title: "first markdown"
+author: "Backman"
+date: "3/10/2020"
+output: html_document
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(plotly)
+```
+
+This is the code for a plot of Exam 1 score distributions:
+
+```{r echo=TRUE,warning= FALSE,message = FALSE,fig.align='left'}
+df <- read.csv("./Data/1620_scores.csv")
+p1 <- ggplot(df,aes(x=Exam.1..4245260.)) + geom_histogram()
+ggplotly(p1)
+
+```
+
+
+___ 
+
+Three underscores is a line break
+
+**BOLD** text
+*italic* text
+
+Help -> Cheatsheets -> R Markdown Cheatsheet
+
+Google markdown table generator to make tables easier (copy and paste it)

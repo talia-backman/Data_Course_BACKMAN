@@ -28,9 +28,6 @@ dev.off()
 summary(df$DNA_Concentration_Katy)
 summary(df$DNA_Concentration_Ben)
 summary(df$Year_Collected)
-plot(x=df$DNA_Concentration_Ben,y=df$Extract.Code)
-plot(x=df$DNA_Concentration_Katy,y=df$Extract.Code)
-plot(x=df$DNA_Concentration_Ben,y=df$DNA_Concentration_Katy)
 bensummary <- summary(df$DNA_Concentration_Ben)
 katysummary <- summary(df$DNA_Concentration_Katy)
 cbind(bensummary, katysummary)
@@ -51,8 +48,20 @@ class(df$Date_Collected)
 df$Date_Collected <- as.character(df$Date_Collected)
 class(df$Date_Collected)
 
-jpeg("Downstairs.jpeg")
+jpeg("Ben_DNA_over_time.jpeg")
 plot(down$Date_Collected,down$DNA_Concentration_Ben,
      main= "Ben, Downstairs, by Date_Collected",
-     xlab= "Date Collected", ylab= "DNA Concentration")
+     xlab= "Date_Collected", ylab= "DNA_Concentration_Ben")
 dev.off()
+
+#BONUS: For Ben, Which year's extractions had the highest *average*
+# DNA Concentration and what is it?
+
+df2 <-df %>% 
+  group_by(Year_Collected) %>%
+  summarize(AVERAGE=mean(DNA_Concentration_Ben))
+write.csv(df2, "./Exam_1/Ben_Average_Conc.csv")
+
+max(df2$AVERAGE)
+df2$Year_Collected[df2$AVERAGE == max(df2$AVERAGE)]
+#Answer= 1.463386 is the highest average in 2007
