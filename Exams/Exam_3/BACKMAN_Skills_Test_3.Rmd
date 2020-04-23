@@ -1,12 +1,30 @@
 ---
-title: "BACKMAN_Skills_Test_3"
-author: "Backman"
-date: "4/11/2020"
+title: "BACKMAN Skills Test 3"
 output: html_document
 ---
+<style type="text/css">
+.main-container {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+
+<style>
+div.gray { background-color:#7e8687; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "gray">
+
+
+
+<style>
+div.blue { background-color:#9dc9d1; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+### **Load Libraries needed for analyses**
 
 ```{r, message=FALSE}
-#load libraries
 library(tidyverse)
 library(modelr)
 library(GGally)
@@ -16,52 +34,46 @@ library(patchwork)
 library(caret)
 ```
 
+### **Load dataset**
+
 ```{r}
-#load mtcars dataset
 data("mtcars")
 ```
 
+### **Get an overview of mtcars dataset and possible correlations**
+
 ```{r, message=FALSE}
-#1. Do an analysis of mtcars dataset
-#get to know your data
 mtcars %>% ggpairs()
 ```
 
-Do a ggpair analysis to see where correlations may be.  Looks like mpg has a correlation with wt and cyl.  
+#### Looks like mpg has some correlation with wt and cyl.
+
+### **Test different models and look at their pvalues**
+#### Reminder: pvalue<0.05 is significant. Anything over that value shouldn't be used in a model.
 
 ```{r}
-#test different models
 mod1 <- lm(data=mtcars, formula = mpg ~ wt)
 mod2 <- lm(data=mtcars, formula = mpg ~ wt + cyl)
 mod3 <- lm(data=mtcars, formula = mpg ~ wt * cyl)
 ```
 ```{r}
-#look at summaries for the models and look at intercepts and pvalues
-summary(mod1)
-summary(mod2) 
-summary(mod3)
+summary(mod1) ; summary(mod2) ; summary(mod3)
 ```
 
-All pvalues look significant, they all seem to be good models so we will dig deeper into these models.
+#### All pvalues look significant, they all seem to be good models.
 
-```{r, message=FALSE}
-#look at model diagnostics
-gg_diagnose(mod1)
-gg_diagnose(mod2)
-gg_diagnose(mod3)
+### **Compare our current models to see if they differ from eachother**
+
+```{r,message=FALSE}
+anova(mod1, mod2) ; anova(mod1, mod3) ; anova(mod2, mod3)
 ```
+
+#### All the models are different from eachother.  We know this because they all have significant pvalues (<0.05).
+
+### **Best fit line**
+#### Because nothing has been conclusively leading us to a certain model, we will see which has the best fit line.
 
 ```{r}
-#compare models
-anova(mod1, mod2) 
-anova(mod1, mod3)
-anova(mod2, mod3)
-```
-
-This shows that all the models are different from eachother because they all have significant pvalues.
-
-```{r}
-#which has the best fit line?
 mod1mse <- mean(residuals(mod1)^2)
 mod2mse <- mean(residuals(mod2)^2)
 mod3mse <- mean(residuals(mod3)^2)
@@ -69,38 +81,45 @@ mod3mse <- mean(residuals(mod3)^2)
 mod1mse ; mod2mse ; mod3mse
 ```
 
-mod3mse has the best fit line, so we will use that model.
+#### The lowest number shows the best fit line model.  mod3mse has the best fit line, so we will use that model.
 
-```{r}
-#evaluate predictions
+### **Evaluating predictions**
+
+```{r, message=FALSE}
 df_mod3 <- add_predictions(mtcars,mod3) 
-df_mod3
 formula(df_mod3)
 ```
-```{r}
+```{r, message=FALSE}
 allmods <- gather_predictions(mtcars, mod1,mod2,mod3) 
-allmods
-skim(allmods)
-names(allmods)
+head(allmods)
 ```
 
+### **Look at predictions for all models**
+
 ```{r}
-#compare predictions to reality
+ggplot(allmods,aes(x=wt,color=factor(cyl))) +
+  geom_point(aes(y=mpg),alpha=.25) +
+  geom_point(aes(y=pred),color="Black") +
+  facet_wrap(~model) +
+  theme_bw()
+```
+
+#### Looks like mod2 or mod3 will be best for our data.  I will use mod3. 
+
+### **Compare predictions to reality for mod3**
+
+```{r}
 p1.new <- ggplot(df_mod3,aes(x=wt,color=factor(cyl))) +
   geom_point(aes(y=mpg),alpha=.5,size=2) +
   geom_point(aes(y=pred),color="Black") + theme_bw()
 p1.new
 ```
 
-```{r}
-#look at predictions for the models
-ggplot(allmods,aes(x=wt,color=factor(cyl))) +
-  geom_point(aes(y=mpg),alpha=.25) +
-  geom_point(aes(y=pred),color="Black") +
-  facet_wrap(~model) +
-  theme_bw()
+#### Everything looks good.  
 
-#Looks like model 2 and 3 are best for this data.  
+### **Test mod3 against a trained model of predictions**
+
+```{r, message=FALSE, warning=FALSE}
 
 set.seed(123)
 set <- caret::createDataPartition(mtcars$mpg)
@@ -109,12 +128,7 @@ set <- set$Resample1
 train <- mtcars[set,]
 test <- mtcars[-set,]
 
-formula(mod3)
 trainedmodel <- lm(data=train, formula = formula(mod3))
-
-add_predictions(test,mod3) %>%
-  ggplot(aes(x=wt,color=factor(cyl))) +
-  geom_point(aes(y=mpg)) + geom_smooth(method = "lm",aes(y=pred))
 
 testedresiduals <- (test$pred - test$mpg)
 
@@ -126,4 +140,4 @@ ggplot(df2, aes(x=disp,color=factor(cyl))) +
 
 ```
 
-From the models, the third one gave the best mathematical guess as to how mpg can be predicted by cylinder and displacement.  
+From the models, the third one gave the best mathematical guess as to how mpg can be predicted by cylinder and displacement. The linear models seem to be pretty close.  I would say this is a good model based off of the graphs and pvalues.  

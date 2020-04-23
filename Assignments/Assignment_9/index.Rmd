@@ -1,0 +1,135 @@
+---
+title: "Assignment 9"
+author: "Backman"
+date: "4/23/2020"
+output: html_document
+---
+<style type="text/css">
+.main-container {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+
+<style>
+div.gray { background-color:#7e8687; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "gray">
+
+
+
+<style>
+div.blue { background-color:#9dc9d1; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+## **Instructions:**
+#### **All file paths should be relative, starting from the Assignment_9 directory!! (where you found this file)**
+
+#### **This means that you need to create a new R-Project named "Assignment_9.Rproj" in your Assignment_9 directory, and work from scripts within that.**
+
+
+### **For credit...**
+
+#### 1.  Push a completed version of your Rproj and R-markdown file (details at end of this assignment) to GitHub
+#### 2.  Your score will also depend on your analyses and presentation of your final report
+
+____________
+
+### Your tasks:
+
++ Use the data set "../../Data/GradSchool_Admissions.csv"
++ You will explore and model the predictors of graduate school admission
+  - the "admit" column is coded as 1=success and 0=failure
+  - the other columns are the GRE score, the GPA, and the rank of the undergraduate institution, where I is "top-tier."
++ Document your data explorations, figures, and conclusions in a reproducible R-markdown report
++ Upload your **self-contained** R project, including knitted report, to GitHub in *your* Assignment_9 directory
+
+#### **Load Libraries**
+```{r, message=FALSE}
+library(tidyverse)
+library(modelr)
+library(GGally)
+library(lindia)
+library(skimr)
+library(patchwork)
+library(caret)
+```
+
+#### **Load data**
+```{r, message=FALSE}
+df <- read_csv("./GradSchool_Admissions.csv")
+```
+
+#### **Explore data**
+```{r}
+summary(df)
+df %>% ggpairs()
+```
+
+#### **Clean data**
+```{r}
+df$rank <- factor(df$rank)
+df$admit <- as.logical(df$admit)
+```
+
+#### **Making models**
+```{r}
+mod1 <- glm(formula = admit ~ gre + gpa + rank, data = df, family = "binomial")
+mod2 <- glm(formula = admit ~ gre * gpa * rank, data = df, family = "binomial")
+```
+
+### **Comparing models: best fit line**
+```{r}
+mod1mse <- mean(residuals(mod1)^2)
+mod2mse <- mean(residuals(mod2)^2)
+
+mod1mse ; mod2mse
+```
+#### The lowest number shows the best fit line model.  mod2mse has the best fit line, so we will use that model.
+
+### **Evaluating predictions**
+```{r, message=FALSE}
+df_mod2 <- add_predictions(df, mod2, type = "response") 
+allmods <- gather_predictions(df, mod1, mod2) 
+head(allmods)
+```
+
+### **Compare allmods to visually see best model**
+```{r}
+ggplot(allmods,aes(x=gpa,col=rank)) +
+  geom_point(aes(y=pred)) +
+  geom_smooth(method = "lm", aes(y=pred)) +
+  facet_wrap(~model) +
+  theme_bw()
+```
+
+#### Both models seem to follow the trend, but since the line of best fit was better for mod2, we will use mod2. 
+
+### **Look at predictions for model 2**
+```{r, message=FALSE}
+p1 <- ggplot(df_mod2, aes(x=gpa, y=pred, color=admit)) + theme_minimal() +
+  geom_point() + geom_smooth(method = "lm")
+p1
+
+p2 <- ggplot(df_mod2, aes(x=gre, y=pred, color=admit)) + theme_minimal()  +
+  geom_point() + geom_smooth(method = "lm")
+p2 
+```
+
+#### Both gre and gpa seem to be good indicators of whether you will be admitted or not.  
+
+```{r, message=FALSE}
+p3 <- ggplot(df_mod2, aes(x=gpa, y=pred, color=rank)) + theme_minimal() +
+  geom_point() + geom_smooth(method = "lm")
+p3
+
+p4 <- ggplot(df_mod2, aes(x=gre, y=pred, color=rank)) + theme_minimal()  +
+  geom_point() + geom_smooth(method = "lm")
+p4
+```
+Looks like both gre and gpa are good indicators of the school rank that you are admitted into.  
+
+Based off of these graphs, it looks like gpa and gre contribute whether you will be admitted into a school.  The higher the gre and gpa, the more likely you are to get into a higher ranking school.
+
