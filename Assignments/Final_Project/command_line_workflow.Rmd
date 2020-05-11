@@ -90,36 +90,31 @@ ___
 ### **4. Contig Binning using MetaBAT**
 #### In order to start contig binnig, scaffolds.fasta had to be converted into a .bam file index.  I used the package bwa and samtools for this.
 - Create reference index (bwa index is the command, -p reference is the output name for future commands, -a bwtsw is used because it is a large dataset, ref.fa is the input)
+#### Build reference index for bowtie2
 ```{bash, eval=FALSE}
-bwa index -p reference -a bwtsw ./Taxa/all_taxa_scaffolds/ref.fa
+bowtie2-build -f ref.fa dbname
 ```
-- Align the reference with taxa, convert it into .bwa format
+##### Reference genome used was Ephemera danica from NCBI
+#### Go back and use the starting fastq files
 ```{bash, eval=FALSE}
-bwa aln reference EP429.fasta > EP429.bwa
+bowtie2 -x dbname -1 EP429_R1_001.fastq -2 EP429_R2_001.fastq  --no-unal -S EP429.sam
 ```
-- Convert the .bwa taxa files to .sam format (which will be a large file)
+##### Each taxa only had .5% to 4% mayfly DNA, must have been sloppy lab work
+#### Convert .sam file to .bam file
 ```{bash, eval=FALSE}
-bwa samse reference EP429.bwa EP429.fasta > EP429.sam
+samtools view -Sb EP429.sam > EP429.bam
 ```
-- Convert the .sam taxa files to .bam (for smaller size files to work with)
-```{bash, eval=FALSE}
-samtools view -bT reference EP429.sam > EP429.bam
-```
-- Sort .bam files
+#### Sort the .bam files
 ```{bash, eval=FALSE}
 samtools sort EP429.bam -o EP429_sorted.bam
 ```
-- Summarize mapping files/ calculate coverage
+#### Contig binning using either metaBAT
 ```{bash, eval=FALSE}
-../../../../../../bin/jgi_summarize_bam_contig_depths --outputDepth depth.txt --pairedContigs paired.txt *.bam
+runMetaBat.sh seqs.fa EP023_sorted.bam EP025_sorted.bam EP080_sorted.bam EP084_sorted.bam EP109_sorted.bam EP150_sorted.bam EP411_sorted.bam EP416_sorted.bam EP418_sorted.bam EP429_sorted.bam
 ```
-- Finally.. Run the actual contig binning step!!
-```{bash, eval=FALSE}
-../../../../../../bin/metabat/runMetaBat.sh EP023.fasta EP025.fasta EP080.fasta EP084.fasta EP109.fasta EP150.fasta EP411.fasta EP416.fasta EP418.fasta EP429.fasta EP023.bam EP025.bam EP080.bam EP084.bam EP109.bam EP150.bam EP411.bam EP416.bam EP418.bam EP429.bam 
-```
-#### Contig binning command isn't working, so I am currently at this step troubleshooting. It either says: 
-#### - Number of clusters formed: 0
-#### - Segmentation fault (core dumped)
+
+##### Contig binning command isn't working, so I am currently at this step troubleshooting. 
+
 ___
 ### **5. Isolate Mayfly data**
 ```{bash, eval=FALSE}
@@ -137,23 +132,3 @@ ___
 ### **7. Phylogenetic Trees using IQTree**
 ```{bash, eval=FALSE}
 ```
-## **MAY 9 WORKFLOW**
-### 1. Build reference index for bowtie2
-```{bash, eval=FALSE}
-bowtie2-build -f ref.fa dbname
-```
-#### Reference genome used was Ephemera danica from NCBI
-### 2. Go back and use the starting fastq files
-```{bash, eval=FALSE}
-bowtie2 -x dbname -1 EP429_R1_001.fastq -2 EP429_R2_001.fastq  --no-unal -S EP429.sam
-```
-#### Each taxa only had .5% to 4% mayfly DNA, must have been sloppy lab work
-### 3. Convert .sam file to .bam file
-```{bash, eval=FALSE}
-samtools view -Sb EP429.sam > EP429.bam
-```
-### 4. Sort the .bam files
-```{bash, eval=FALSE}
-samtools sort EP429.bam -o EP429_sorted.bam
-```
-### 5. Contig binning using either metaBAT or CONCOCT

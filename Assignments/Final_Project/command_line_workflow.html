@@ -494,43 +494,35 @@ div.blue { background-color:#9dc9d1; border-radius: 5px; padding: 20px;}
 <div id="in-order-to-start-contig-binnig-scaffolds.fasta-had-to-be-converted-into-a-.bam-file-index.-i-used-the-package-bwa-and-samtools-for-this." class="section level4">
 <h4>In order to start contig binnig, scaffolds.fasta had to be converted into a .bam file index. I used the package bwa and samtools for this.</h4>
 <ul>
-<li>Create reference index (bwa index is the command, -p reference is the output name for future commands, -a bwtsw is used because it is a large dataset, ref.fa is the input)</li>
+<li>Create reference index (bwa index is the command, -p reference is the output name for future commands, -a bwtsw is used because it is a large dataset, ref.fa is the input) #### Build reference index for bowtie2</li>
 </ul>
-<pre class="bash"><code>bwa index -p reference -a bwtsw ./Taxa/all_taxa_scaffolds/ref.fa</code></pre>
-<ul>
-<li>Align the reference with taxa, convert it into .bwa format</li>
-</ul>
-<pre class="bash"><code>bwa aln reference EP429.fasta &gt; EP429.bwa</code></pre>
-<ul>
-<li>Convert the .bwa taxa files to .sam format (which will be a large file)</li>
-</ul>
-<pre class="bash"><code>bwa samse reference EP429.bwa EP429.fasta &gt; EP429.sam</code></pre>
-<ul>
-<li>Convert the .sam taxa files to .bam (for smaller size files to work with)</li>
-</ul>
-<pre class="bash"><code>samtools view -bT reference EP429.sam &gt; EP429.bam</code></pre>
-<ul>
-<li>Sort .bam files</li>
-</ul>
+<pre class="bash"><code>bowtie2-build -f ref.fa dbname</code></pre>
+<div id="reference-genome-used-was-ephemera-danica-from-ncbi" class="section level5">
+<h5>Reference genome used was Ephemera danica from NCBI</h5>
+</div>
+</div>
+<div id="go-back-and-use-the-starting-fastq-files" class="section level4">
+<h4>Go back and use the starting fastq files</h4>
+<pre class="bash"><code>bowtie2 -x dbname -1 EP429_R1_001.fastq -2 EP429_R2_001.fastq  --no-unal -S EP429.sam</code></pre>
+<div id="each-taxa-only-had-.5-to-4-mayfly-dna-must-have-been-sloppy-lab-work" class="section level5">
+<h5>Each taxa only had .5% to 4% mayfly DNA, must have been sloppy lab work</h5>
+</div>
+</div>
+<div id="convert-.sam-file-to-.bam-file" class="section level4">
+<h4>Convert .sam file to .bam file</h4>
+<pre class="bash"><code>samtools view -Sb EP429.sam &gt; EP429.bam</code></pre>
+</div>
+<div id="sort-the-.bam-files" class="section level4">
+<h4>Sort the .bam files</h4>
 <pre class="bash"><code>samtools sort EP429.bam -o EP429_sorted.bam</code></pre>
-<ul>
-<li>Summarize mapping files/ calculate coverage</li>
-</ul>
-<pre class="bash"><code>../../../../../../bin/jgi_summarize_bam_contig_depths --outputDepth depth.txt --pairedContigs paired.txt *.bam</code></pre>
-<ul>
-<li>Finally.. Run the actual contig binning step!!</li>
-</ul>
-<pre class="bash"><code>../../../../../../bin/metabat/runMetaBat.sh EP023.fasta EP025.fasta EP080.fasta EP084.fasta EP109.fasta EP150.fasta EP411.fasta EP416.fasta EP418.fasta EP429.fasta EP023.bam EP025.bam EP080.bam EP084.bam EP109.bam EP150.bam EP411.bam EP416.bam EP418.bam EP429.bam </code></pre>
 </div>
-<div id="contig-binning-command-isnt-working-so-i-am-currently-at-this-step-troubleshooting.-it-either-says" class="section level4">
-<h4>Contig binning command isn’t working, so I am currently at this step troubleshooting. It either says:</h4>
-</div>
-<div id="number-of-clusters-formed-0" class="section level4">
-<h4>- Number of clusters formed: 0</h4>
-</div>
-<div id="segmentation-fault-core-dumped" class="section level4">
-<h4>- Segmentation fault (core dumped)</h4>
+<div id="contig-binning-using-either-metabat" class="section level4">
+<h4>Contig binning using either metaBAT</h4>
+<pre class="bash"><code>runMetaBat.sh seqs.fa EP023_sorted.bam EP025_sorted.bam EP080_sorted.bam EP084_sorted.bam EP109_sorted.bam EP150_sorted.bam EP411_sorted.bam EP416_sorted.bam EP418_sorted.bam EP429_sorted.bam</code></pre>
+<div id="contig-binning-command-isnt-working-so-i-am-currently-at-this-step-troubleshooting." class="section level5">
+<h5>Contig binning command isn’t working, so I am currently at this step troubleshooting.</h5>
 <hr />
+</div>
 </div>
 </div>
 <div id="isolate-mayfly-data" class="section level3">
@@ -550,34 +542,6 @@ muscle -in seqs.fa -out seqs.afa -maxiters 1 -diags1 -sv</code></pre>
 <div id="phylogenetic-trees-using-iqtree" class="section level3">
 <h3><strong>7. Phylogenetic Trees using IQTree</strong></h3>
 <pre class="bash"><code></code></pre>
-</div>
-</div>
-<div id="may-9-workflow" class="section level2">
-<h2><strong>MAY 9 WORKFLOW</strong></h2>
-<div id="build-reference-index-for-bowtie2" class="section level3">
-<h3>1. Build reference index for bowtie2</h3>
-<pre class="bash"><code>bowtie2-build -f ref.fa dbname</code></pre>
-<div id="reference-genome-used-was-ephemera-danica-from-ncbi" class="section level4">
-<h4>Reference genome used was Ephemera danica from NCBI</h4>
-</div>
-</div>
-<div id="go-back-and-use-the-starting-fastq-files" class="section level3">
-<h3>2. Go back and use the starting fastq files</h3>
-<pre class="bash"><code>bowtie2 -x dbname -1 EP429_R1_001.fastq -2 EP429_R2_001.fastq  --no-unal -S EP429.sam</code></pre>
-<div id="each-taxa-only-had-.5-to-4-mayfly-dna-must-have-been-sloppy-lab-work" class="section level4">
-<h4>Each taxa only had .5% to 4% mayfly DNA, must have been sloppy lab work</h4>
-</div>
-</div>
-<div id="convert-.sam-file-to-.bam-file" class="section level3">
-<h3>3. Convert .sam file to .bam file</h3>
-<pre class="bash"><code>samtools view -Sb EP429.sam &gt; EP429.bam</code></pre>
-</div>
-<div id="sort-the-.bam-files" class="section level3">
-<h3>4. Sort the .bam files</h3>
-<pre class="bash"><code>samtools sort EP429.bam -o EP429_sorted.bam</code></pre>
-</div>
-<div id="contig-binning-using-either-metabat-or-concoct" class="section level3">
-<h3>5. Contig binning using either metaBAT or CONCOCT</h3>
 </div>
 </div>
 
